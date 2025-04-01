@@ -1,0 +1,415 @@
+openapi: 3.0.0
+info:
+  title: Supabase API
+  version: 1.0.0
+  description: API documentation for my Supabase backend
+servers:
+  - url: https://fejzbmttbhyhenfxnjkq.supabase.co
+    description: Supabase REST API
+
+paths:
+  /rest/v1/employees:
+    get:
+      summary: Get All Employees
+      operationId: getEmployees
+      tags:
+        - Employees
+      security:
+        - apiKeyAuth: []
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of employees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    role:
+                      type: string
+
+  /rest/v1/employees/{id}:
+    get:
+      summary: Get Single Employee
+      operationId: getEmployee
+      tags:
+        - Employees
+      security:
+        - apiKeyAuth: []
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A single employee object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  role:
+                    type: string
+
+  /rest/v1/projects:
+    get:
+      summary: Get All Projects
+      operationId: getProjects
+      tags:
+        - Projects
+      security:
+        - apiKeyAuth: []
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+
+  /rest/v1/projects/{id}:
+    get:
+      summary: Get Project by ID
+      operationId: getProjectById
+      tags:
+        - Projects
+      security:
+        - apiKeyAuth: []
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A single project object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  title:
+                    type: string
+
+  /rest/v1/salaries:
+    get:
+      summary: Get Salaries
+      operationId: getSalaries
+      tags:
+        - Salaries
+      security:
+        - apiKeyAuth: []
+        - bearerAuth: []
+      parameters:
+        - name: select
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "*"
+          description: Supabase-style select clause. Use '*' to get all fields.
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "eq.0e6c214d-9832-4216-9730-e29306c30e36"
+          description: Supabase-style filter
+      responses:
+        '200':
+          description: A list of salaries or a filtered subset
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Salary'
+
+  /auth/v1/token:
+    post:
+      summary: Get Authentication Token
+      description: Authenticates a user and returns a JWT token.
+      operationId: login
+      tags:
+        - Authentication
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - name: grant_type
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "password"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "user@example.com"
+                password:
+                  type: string
+                  example: "securepassword"
+      responses:
+        "200":
+          description: Authentication token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR..."
+
+  /auth/v1/logout:
+    post:
+      summary: Logout User
+      operationId: logout
+      tags:
+        - Authentication
+      security:
+        - apiKeyAuth: []
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful logout
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+
+
+  /storage/v1/object/list/employee-documents:
+    post:
+      summary: List Employee Documents
+      operationId: listEmployeeDocuments
+      tags:
+        - Employee Documents
+      security:
+        - apiKeyAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prefix:
+                  type: string
+                  example: "12345/"
+                limit:
+                  type: integer
+                  example: 100
+                offset:
+                  type: integer
+                  example: 0
+                sortBy:
+                  type: object
+                  properties:
+                    column:
+                      type: string
+                      example: "name"
+                    order:
+                      type: string
+                      enum: [asc, desc]
+              required:
+                - prefix
+      responses:
+        '200':
+          description: A list of employee document objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    fullPath:
+                      type: string
+
+  /storage/v1/object/sign/employee-documents:
+    post:
+      summary: Get Signed URL for Employee Document
+      operationId: getEmployeeDocumentSignedUrl
+      tags:
+        - Employee Documents
+      security:
+        - apiKeyAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                  example: "12345/resume.pdf"
+                expiresIn:
+                  type: integer
+                  example: 60
+      responses:
+        '200':
+          description: A signed URL response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  signedUrl:
+                    type: string
+
+  /storage/v1/object/list/project-documents:
+    post:
+      summary: List Project Documents
+      operationId: listProjectDocuments
+      tags:
+        - Project Documents
+      security:
+        - apiKeyAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prefix:
+                  type: string
+                  example: "project-xyz/"
+                limit:
+                  type: integer
+                  example: 100
+                offset:
+                  type: integer
+                  example: 0
+                sortBy:
+                  type: object
+                  properties:
+                    column:
+                      type: string
+                      example: "name"
+                    order:
+                      type: string
+                      enum: [asc, desc]
+              required:
+                - prefix
+      responses:
+        '200':
+          description: A list of project document objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    fullPath:
+                      type: string
+
+  /storage/v1/object/sign/project-documents:
+    post:
+      summary: Get Signed URL for Project Document
+      operationId: getProjectDocumentSignedUrl
+      tags:
+        - Project Documents
+      security:
+        - apiKeyAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                  example: "project-xyz/spec.pdf"
+                expiresIn:
+                  type: integer
+                  example: 60
+      responses:
+        '200':
+          description: A signed URL response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  signedUrl:
+                    type: string
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: apikey
+
+  schemas:
+    Salary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        user_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        lastName:
+          type: string
+        salary:
+          type: object
+          additionalProperties: true
+          description: JSON structure with salary details
