@@ -115,7 +115,6 @@ paths:
                     type: string
                   title:
                     type: string
-
   /rest/v1/salaries:
     get:
       summary: Get Salaries
@@ -143,12 +142,36 @@ paths:
       responses:
         '200':
           description: A list of salaries or a filtered subset
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Salary'
+          
+
+  /rest/v1/budgets:
+    get:
+      summary: Get budgets
+      operationId: getBudgets
+      tags:
+        - Budgets
+      security:
+        - apiKeyAuth: []
+        - bearerAuth: []
+      parameters:
+        - name: select
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "*"
+          description: Supabase-style select clause. Use '*' to get all fields.
+        - name: project_id
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "eq.0e6c214d-9832-4216-9730-e29306c30e36"
+          description: Supabase-style filter
+      responses:
+        '200':
+          description: A list of salaries or a filtered subset
+         
 
   /auth/v1/token:
     post:
@@ -391,25 +414,3 @@ components:
       type: apiKey
       in: header
       name: apikey
-
-  schemas:
-    Salary:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        created_at:
-          type: string
-          format: date-time
-        user_id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        lastName:
-          type: string
-        salary:
-          type: object
-          additionalProperties: true
-          description: JSON structure with salary details
